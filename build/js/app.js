@@ -12,11 +12,21 @@ Dino.prototype.getLoremIpsum = function(paragraphs, words, displayLoremIpsum) {
     });
 };
 
-// Dino.prototype.getDino(paragraphs, words) {
-//   $.get(`http://dinoipsum.herokuapp.com/api/?format=text&paragraphs=${paragraphs}&words=${words}`, function(response) {
-//     return response;
-//   });
-// }
+Dino.prototype.getDino = function(text, displayDino) {
+  $.get('http://dinoipsum.herokuapp.com/api/?format=json&paragraphs=1&words=1')
+    .then(function(response) {
+      var splitText = text.split(" ");
+      var lastWord = splitText[(splitText.length - 2)];
+      splitText.pop();
+      splitText.pop();
+      splitText.push(response + " ");
+      newText = splitText.join(" ");
+      displayDino(newText);
+    })
+    .fail(function(error) {
+      $('.output').text(error.responseJSON.message);
+    });
+};
 
 exports.dinoModule = Dino;
 
@@ -25,6 +35,10 @@ var Dino = require('./../js/dino.js').dinoModule;
 
 var displayLoremIpsum = function(response) {
   $('.output').html('<h3>Your lorem ipsum:</h3><br><br>' + response);
+};
+
+var displayDino = function(dino) {
+  $('#dino-text').val(dino);
 };
 
 $(function() {
@@ -36,17 +50,10 @@ $(function() {
   });
 
   $('#dino-text').keyup(function(e){
+    var dinoWord = new Dino();
     if (e.which === 32){
       var text = $('#dino-text').val();
-      var splitText = text.split(" ");
-      var lastWord = splitText[(splitText.length - 2)];
-      splitText.pop();
-      splitText.pop();
-      splitText.push("dino ");
-      newText = splitText.join(" ");
-      dino = getDino("0","1");
-      $('#dino-text').val(dino);
-      console.log(dino);
+      dinoWord.getDino(text, displayDino);
     }
   });
 
